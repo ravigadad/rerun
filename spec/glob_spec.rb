@@ -31,6 +31,8 @@ module Rerun
 
         "." => "\\.",
 
+        "}" => "}",
+        "foo(,)" => "foo(,)",
         "{foo,bar,baz}" => "(foo|bar|baz)",
         "{.txt,.md}" => '(\.txt|\.md)',
 
