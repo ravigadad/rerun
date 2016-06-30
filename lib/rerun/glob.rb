@@ -32,50 +32,45 @@ module Rerun
 
       chars = smoosh(chars)
 
-      curlies = 0
-      escaping = false
-      string = chars.map do |char|
-        if escaping
-          escaping = false
-          char
-        else
-          case char
-            when '**'
-              "([^/]+/)*"
-            when '*'
-              ".*"
-            when "?"
-              "."
-            when "."
-              "\\."
+      visited_chars, regexp_array = [], []
+      enumerator = chars.each
 
-            when "{"
-              curlies += 1
-              "("
-            when "}"
-              if curlies > 0
-                curlies -= 1
-                ")"
-              else
-                char
-              end
-            when ","
-              if curlies > 0
-                "|"
-              else
-                char
-              end
-            when "\\"
-              escaping = true
-              "\\"
+      loop do
+        char = enumerator.next
+        regexp_array << case char
+          when '**'
+            "([^/]+/)*"
+          when '*'
+            ".*"
+          when "?"
+            "."
+          when "."
+            "\\."
 
+          when "{"
+            "("
+          when "}"
+            if self.class.nested?(visited_chars)
+              ")"
             else
               char
+            end
+          when ","
+            if self.class.nested?(visited_chars)
+              "|"
+            else
+              char
+            end
+          when "\\"
+            ["\\", enumerator.next]
 
-          end
+          else
+            char
         end
-      end.join
-      START_OF_FILENAME + string + END_OF_STRING
+
+        visited_chars << char
+      end
+      START_OF_FILENAME + regexp_array.flatten.join + END_OF_STRING
     end
 
     def to_regexp
