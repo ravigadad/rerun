@@ -23,12 +23,7 @@ module Rerun
 
     def self.nested?(arr)
       unclosed_braces = arr.inject(0) { |count, char|
-        if char == "{"
-          count += 1
-        elsif char == "}"
-          count -= 1
-        end
-        count
+        count + { "{" => 1, "}" => -1 }.fetch(char, 0)
       }
       unclosed_braces > 0
     end
