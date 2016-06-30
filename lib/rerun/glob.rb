@@ -4,7 +4,6 @@
 #
 module Rerun
   class Glob
-    NO_LEADING_DOT = '(?=[^\.])'   # todo
     START_OF_FILENAME = '(\A|\/)'  # beginning of string or a slash
     END_OF_STRING = '\z'
 
