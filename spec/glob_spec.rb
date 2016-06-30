@@ -43,7 +43,7 @@ module Rerun
         "**/*.txt" => "([^/]+/)*.*\\.txt",
 
       }.each_pair do |glob_string, regexp_string|
-        specify glob_string do
+        specify "#{glob_string} converts to #{regexp_string}" do
           Glob.new(glob_string).to_regexp_string.should ==
               Glob::START_OF_FILENAME + regexp_string + Glob::END_OF_STRING
         end
