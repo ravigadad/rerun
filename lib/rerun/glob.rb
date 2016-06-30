@@ -6,6 +6,16 @@ module Rerun
   class Glob
     START_OF_FILENAME = '(\A|\/)'  # beginning of string or a slash
     END_OF_STRING = '\z'
+    CONVERSION_TABLE = {
+      "**" => "([^/]+/)*",
+      "*" => ".*",
+      "?" => ".",
+      "." => "\\.",
+      "{" => "(",
+      "}" => -> visited, enumerator { nested?(visited) ? ")" : "}" },
+      "," => -> visited, enumerator { nested?(visited) ? "|" : "," },
+      "\\" => -> visited, enumerator { "\\#{enumerator.next}" }
+    }
 
     def self.glob_to_regexp(glob)
       Glob.new(glob).to_regexp
@@ -29,48 +39,21 @@ module Rerun
 
     def to_regexp_string
       chars = @glob_string.split('')
-
       chars = smoosh(chars)
-
-      visited_chars, regexp_array = [], []
       enumerator = chars.each
+
+      visited, results = [], []
 
       loop do
         char = enumerator.next
-        regexp_array << case char
-          when '**'
-            "([^/]+/)*"
-          when '*'
-            ".*"
-          when "?"
-            "."
-          when "."
-            "\\."
-
-          when "{"
-            "("
-          when "}"
-            if self.class.nested?(visited_chars)
-              ")"
-            else
-              char
-            end
-          when ","
-            if self.class.nested?(visited_chars)
-              "|"
-            else
-              char
-            end
-          when "\\"
-            ["\\", enumerator.next]
-
-          else
-            char
+        conversion = CONVERSION_TABLE.fetch(char, char)
+        if conversion.is_a?(Proc)
+          conversion = conversion.call(visited, enumerator)
         end
-
-        visited_chars << char
+        results << conversion
+        visited << char
       end
-      START_OF_FILENAME + regexp_array.flatten.join + END_OF_STRING
+      START_OF_FILENAME + results.join + END_OF_STRING
     end
 
     def to_regexp
