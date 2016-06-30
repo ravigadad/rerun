@@ -5,6 +5,11 @@ require "rerun/glob"
 
 module Rerun
   describe Glob do
+    describe '.glob_to_regexp' do
+      it 'converts given glob to a regexp' do
+        Glob.glob_to_regexp("foo*").should == /#{Glob::START_OF_FILENAME}foo.*#{Glob::END_OF_STRING}/
+      end
+    end
 
     describe "#to_regexp" do
       it "makes a regexp" do

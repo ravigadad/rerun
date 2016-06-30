@@ -7,6 +7,10 @@ module Rerun
     START_OF_FILENAME = '(\A|\/)'  # beginning of string or a slash
     END_OF_STRING = '\z'
 
+    def self.glob_to_regexp(glob)
+      Glob.new(glob).to_regexp
+    end
+
     def initialize glob_string
       @glob_string = glob_string
     end
