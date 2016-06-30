@@ -122,6 +122,27 @@ module Rerun
       end
     end
 
+    describe ".nested?" do
+      it "returns true if one unclosed curly brace exists in array" do
+        arr = %w[{ foo]
+        Glob.nested?(arr).should == true
+      end
+
+      it "returns true if at least one curly brace is unclosed in array" do
+        arr = %w[{ { }]
+        Glob.nested?(arr).should == true
+      end
+
+      it "returns false if unclosed curly braces do not exist in array" do
+        arr = %w[{ }]
+        Glob.nested?(arr).should == false
+      end
+
+      it "returns false if no curly braces in array" do
+        arr = %w[foo]
+        Glob.nested?(arr).should == false
+      end
+    end
   end
 end
 
